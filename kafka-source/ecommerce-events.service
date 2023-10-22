@@ -1,0 +1,17 @@
+[Unit]
+Description=Ecommerce events service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+WorkingDirectory=/home/ec2-user/ecommerce-events
+Type=simple
+Restart=always
+RestartSec=1
+User=ec2-user
+ExecStart=python /home/ec2-user/ecommerce-events/generate-ecommerce-events.py
+Environment="JAVA_HOME=/usr/lib/jvm/java"
+PIDFile=/tmp/flume.pid
+
+[Install]
+WantedBy=multi-user.target

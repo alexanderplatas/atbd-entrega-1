@@ -1,0 +1,15 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Create security group for node communication
+    amazon.aws.ec2_security_group:
+      name: hadoop-sg
+      description: sg with total access within hadoop nodes
+      region: us-east-1
+      rules:
+        - proto: all
+          group_name: hadoop-sg
+        - proto: tcp
+          cidr_ip: 0.0.0.0/0
+          ports: 
+          - 22

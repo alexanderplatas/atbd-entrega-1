@@ -1,0 +1,17 @@
+[Unit]
+Description=Zookeeper service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+WorkingDirectory=/home/ec2-user/kafka_2.13-3.5.1
+Type=simple
+Restart=always
+RestartSec=1
+User=ec2-user
+ExecStart=/home/ec2-user/kafka_2.13-3.5.1/bin/zookeeper-server-start.sh /home/ec2-user/kafka_2.13-3.5.1/config/zookeeper.properties
+Environment="JAVA_HOME=/usr/lib/jvm/java"
+PIDFile=/tmp/flume.pid
+
+[Install]
+WantedBy=multi-user.target

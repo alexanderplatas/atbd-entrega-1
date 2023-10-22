@@ -1,0 +1,61 @@
+---
+- hosts: nifi
+  tasks:
+  - name: Download NiFi
+    ansible.builtin.get_url:
+      url: https://dlcdn.apache.org/nifi/1.23.2/nifi-1.23.2-bin.zip
+      dest: /home/ec2-user
+
+  - name: Extract NiFi
+    ansible.builtin.command: unzip /home/ec2-user/nifi-1.23.2-bin.zip
+
+  - name: Install NiFi as a service
+    become: true
+    ansible.builtin.command: /home/ec2-user/nifi-1.23.2/bin/nifi.sh install
+
+  # - name: Start NiFi
+  #   become: true
+  #   ansible.builtin.command: service nifi start
+
+  - name: Start NiFi
+    become: true
+    systemd:
+      state: started
+      name: nifi
+
+
+  - name: Fetch nifi.properties config file
+    ansible.builtin.fetch:
+      src: /home/ec2-user/nifi-1.23.2/conf/nifi.properties
+      dest: "{{ playbook_dir }}/nifi.properties"
+      flat: true
+
+- hosts: localhost
+  tasks:
+  - name: Replace nifi.remote.input.secure=true by nifi.remote.input.secure=false
+    ansible.builtin.shell: sed -i 's/nifi.remote.input.secure=true/nifi.remote.input.secure=false/g' {{playbook_dir}}/nifi.properties
+
+  - name: Set nifi.web.http.host
+    ansible.builtin.shell: sed -i 's/nifi.web.http.host=/nifi.web.http.host=0.0.0.0/g' {{playbook_dir}}/nifi.properties
+
+  - name: Set nifi.web.http.port
+    ansible.builtin.shell: sed -i 's/nifi.web.http.port=/nifi.web.http.port=8080/g' {{playbook_dir}}/nifi.properties
+
+  - name: Unset nifi.web.https.host
+    ansible.builtin.shell: sed -i 's/nifi.web.https.host=127.0.0.1/nifi.web.https.host=/g' {{playbook_dir}}/nifi.properties
+
+  - name: Unset nifi.web.https.port
+    ansible.builtin.shell: sed -i 's/nifi.web.https.port=8443/nifi.web.https.port=/g' {{playbook_dir}}/nifi.properties
+
+- hosts: nifi
+  tasks:
+  - name: Copy nifi.properties to nifi host
+    ansible.builtin.copy:
+      src: "{{playbook_dir}}/nifi.properties"
+      dest: /home/ec2-user/nifi-1.23.2/conf/nifi.properties
+
+  - name: Restart NiFi
+    become: true
+    systemd:
+      state: restarted
+      name: nifi

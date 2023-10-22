@@ -1,0 +1,42 @@
+---
+- hosts: elasticsearch_host
+  tasks:
+  # - name: Download Elasticsearch
+  #   ansible.builtin.get_url:
+  #     url: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.10.2-linux-x86_64.tar.gz
+  #     dest: /home/ec2-user
+
+  # - name: Extract Elasticsearch
+  #   ansible.builtin.command: tar -xf /home/ec2-user/elasticsearch-8.10.2-linux-x86_64.tar.gz
+
+  - name: Import Elasticsearch rpm key
+    become: true
+    ansible.builtin.rpm_key:
+      state: present
+      key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+  - name: Add Elasticsearch repository
+    become: true
+    ansible.builtin.yum_repository:
+      name: elasticsearch
+      description: Elasticsearch repository for 8.x packages
+      baseurl: https://artifacts.elastic.co/packages/8.x/yum
+      gpgcheck: true
+      gpgkey: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+
+  - name: Install Elasticsearch
+    become: true
+    ansible.builtin.yum:
+      name: elasticsearch
+      enablerepo: elasticsearch
+      state: present
+
+
+  - name: Start elasticsearch
+    become: true
+    ansible.builtin.systemd:
+      name: elasticsearch
+      state: started
+      enabled: true
+      daemon-reload: true

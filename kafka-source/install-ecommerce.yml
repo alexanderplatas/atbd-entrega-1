@@ -1,0 +1,102 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Start ecommerce instance
+    amazon.aws.ec2_instance:
+      state: "running"
+      name: "ecommerce_platform"
+      key_name: "vockey"
+      instance_type: t3.large
+      security_groups:
+        - hadoop-sg
+      image_id: ami-051f7e7f6c2f40dc1
+      region: us-east-1
+      tags:
+        Group: ecommerce
+      volumes:
+      - device_name: /dev/sda1
+        ebs:
+          volume_size: 8
+          delete_on_termination: true
+
+  - meta: refresh_inventory
+
+- hosts: tag_Name_ecommerce_platform
+  tasks:
+  - name: Install Java
+    ansible.builtin.command: sudo yum install -y java-1.8.0-amazon-corretto java-1.8.0-amazon-corretto-devel
+
+  - name: Set JAVA_HOME environment variable at ~/.bashrc
+    ansible.builtin.shell: echo 'export JAVA_HOME=/usr/lib/jvm/java' >> ~/.bashrc
+
+  - name: Download Kafka
+    ansible.builtin.get_url:
+      url: https://downloads.apache.org/kafka/3.5.1/kafka_2.13-3.5.1.tgz
+      dest: /home/ec2-user
+
+  - name: Extract kafka
+    ansible.builtin.command: tar -xf /home/ec2-user/kafka_2.13-3.5.1.tgz
+
+  - name: Copy zookeeper.service to instance
+    become: true
+    ansible.builtin.copy:
+      src: zookeeper.service
+      dest: /etc/systemd/system/zookeeper.service
+
+  - name: Copy kafka.service to instance
+    become: true
+    ansible.builtin.copy:
+      src: kafka.service
+      dest: /etc/systemd/system/kafka.service
+
+  - name: Start Zookeeper
+    become: true
+    ansible.builtin.systemd:
+      state: started
+      name: zookeeper
+      daemon_reload: true
+      enabled: true
+
+  - name: Start Kafka
+    become: true
+    ansible.builtin.systemd:
+      state: started
+      name: kafka
+      daemon_reload: true
+      enabled: true
+
+  - name: Copy ecommerce-events directory
+    ansible.builtin.copy:
+      src: ecommerce-events
+      dest: /home/ec2-user/
+
+  - name: Install python and python-pip
+    ansible.builtin.shell: sudo yum install -y python python-pip
+
+  - name: Install kafka-python and pyspark Python libraries
+    ansible.builtin.shell: pip install kafka-python pyspark
+
+  - name: Copy input dataset
+    ansible.builtin.copy:
+      src: ecommerce_data.orc.zip
+      dest: /home/ec2-user/
+
+  - name: Create input directory
+    ansible.builtin.shell: mkdir /home/ec2-user/input
+
+  - name: Unzip input dataset
+    ansible.builtin.shell: unzip /home/ec2-user/ecommerce_data.orc.zip -d /home/ec2-user/input
+
+  - name: Copy ecommerce-events.service to instance
+    become: true
+    ansible.builtin.copy:
+      src: ecommerce-events.service
+      dest: /etc/systemd/system/ecommerce-events.service
+
+  - name: Start ecommerce-events
+    become: true
+    ansible.builtin.systemd:
+      state: started
+      name: ecommerce-events
+      daemon_reload: true
+      enabled: true

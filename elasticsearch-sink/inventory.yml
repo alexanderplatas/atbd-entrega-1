@@ -1,0 +1,3 @@
+elasticsearch_host:
+  hosts:
+    ec2-44-199-235-113.compute-1.amazonaws.com:
