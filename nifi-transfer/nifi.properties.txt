@@ -174,7 +174,7 @@ nifi.web.https.ciphersuites.include=
 nifi.web.https.ciphersuites.exclude=
 
 # security properties #
-nifi.sensitive.props.key=whH7LGKfbvA3tIdvdnsqDHZDUGcufvYN
+nifi.sensitive.props.key=SRaDPMTSFEKurYEPcZvWRNcaDGl7nuRR
 nifi.sensitive.props.key.protected=
 nifi.sensitive.props.algorithm=NIFI_PBKDF2_AES_GCM_256
 nifi.sensitive.props.additional.keys=
@@ -183,11 +183,11 @@ nifi.security.autoreload.enabled=false
 nifi.security.autoreload.interval=10 secs
 nifi.security.keystore=./conf/keystore.p12
 nifi.security.keystoreType=PKCS12
-nifi.security.keystorePasswd=09af91e572ab9a7422d8aa15b3aec5ff
-nifi.security.keyPasswd=09af91e572ab9a7422d8aa15b3aec5ff
+nifi.security.keystorePasswd=6fc69346b1d1ff996a9747df177c5a2a
+nifi.security.keyPasswd=6fc69346b1d1ff996a9747df177c5a2a
 nifi.security.truststore=./conf/truststore.p12
 nifi.security.truststoreType=PKCS12
-nifi.security.truststorePasswd=629e584afe199a6acafa72f1043aae62
+nifi.security.truststorePasswd=c9f40d691db6e28f5ab009ae1a506eae
 nifi.security.user.authorizer=single-user-authorizer
 nifi.security.allow.anonymous.authentication=false
 nifi.security.user.login.identity.provider=single-user-provider

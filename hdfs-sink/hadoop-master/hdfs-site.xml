@@ -18,7 +18,7 @@
 
 <configuration>
     <property>
-        <name>fs.defaultFS</name>
-        <value>hdfs://ip-172-31-26-26.ec2.internal:9000</value>
+        <name>dfs.namenode.name.dir</name>
+        <value>/home/ec2-user/nn</value>
     </property>
 </configuration>
